@@ -1,0 +1,182 @@
+﻿<Window x:Class="WinChat.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WinChat"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:properties="clr-namespace:WinChat.Properties"
+        xmlns:converter="clr-namespace:WinChat.Converters"
+        xmlns:control="clr-namespace:WinChat.Controls"
+        xmlns:viewmodel="clr-namespace:WinChat.ViewModels"
+        mc:Ignorable="d"
+        Title="WinChat" Height="350" Width="500"
+        Background="#FF7CA0FF" ResizeMode="CanMinimize">
+    <Window.DataContext>
+        <viewmodel:MainWindowViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <converter:InverseBooleanConverter x:Key="InverseBool"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="10"
+              IsEnabled="{Binding ButtonStatus, 
+                                  Converter={StaticResource InverseBool}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal">
+                <TextBlock Text="Server IP:"
+                           VerticalAlignment="Center"/>
+                <TextBox Text="{Binding Source={x:Static properties:Settings.Default},
+                                        Path=connectingIp, UpdateSourceTrigger=PropertyChanged}"
+                         Padding="2"
+                         Width="100" Margin="5,0"/>
+                <TextBlock Text="Port:"
+                           VerticalAlignment="Center"/>
+                <xctk:IntegerUpDown Text="{Binding Source={x:Static properties:Settings.Default},
+                                                   Path=connectingPort, UpdateSourceTrigger=PropertyChanged}"
+                                    Minimum="0" Maximum="65535"
+                                    Padding="2" Width="70" Margin="5,0"/>
+            </StackPanel>
+            
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal">
+                <TextBlock Text="User Name:"
+                           VerticalAlignment="Center"/>
+                <TextBox Text="{Binding Source={x:Static properties:Settings.Default},
+                                        Path=userName, UpdateSourceTrigger=PropertyChanged}"
+                         Padding="2" MaxLength="10"
+                         Width="110" Margin="5,0,0,0"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="8,0,8,8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+
+            <ListView Grid.Row="0" Grid.Column="0" Margin="2"
+                      ScrollViewer.IsDeferredScrollingEnabled="True"
+                      ScrollViewer.VerticalScrollBarVisibility="Visible"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      ItemsSource="{Binding MessageList}"
+                      HorizontalContentAlignment="Stretch">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0">
+                                <TextBox Text="{Binding UserName}"
+                                         MaxLines="1"
+                                         IsReadOnly="True"
+                                         VerticalAlignment="Top"
+                                         BorderThickness="0"/>
+                            </Border>
+                            <TextBlock Grid.Column="1" Text=":"/>
+                            <Border Grid.Column="2">
+                                <TextBox Text="{Binding Text}"
+                                         TextWrapping="Wrap"
+                                         IsReadOnly="True"
+                                         BorderThickness="0"/>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+                
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{x:Null}"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Focusable" Value="False"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+
+            <Grid Grid.Row="0" Grid.Column="1"
+                  Width="110" Margin="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <control:ToggleSwitchControl Margin="10,5"
+                                             HorizontalAlignment="Left"/>
+                <TextBlock Grid.Row="1"
+                           Text="Connection List:"/>
+                <ListView Grid.Row="2"
+                          ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          ItemsSource="{Binding ConnectionList}"/>
+            </Grid>
+
+            <Grid Grid.Row="1" Grid.Column="0"
+                  x:Name="SendGrid" Margin="2"
+                  IsEnabled="{Binding ButtonStatus}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0"
+                           Text="Message:"
+                           VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1"
+                         Text="{Binding EnterMessage,
+                                        UpdateSourceTrigger=PropertyChanged}"
+                         Padding="2" Margin="5,0,0,0">
+                    <!--<TextBox.ToolTip>
+                        <ToolTip Placement="Right"
+                                 VerticalOffset="-30"
+                                 HorizontalOffset="-15">
+                            <TextBlock Text="{Binding OverLengthTooltipText}"/>
+                            <ToolTip.Triggers>
+                                <DataTrigger Binding="{Binding ToggleOverLengthTooltip}"
+                                             Value="False">
+                                    <Setter Property="ToolTip.IsOpen" Value="False"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ToggleOverLengthTooltip}"
+                                             Value="True">
+                                    <Setter Property="ToolTip.IsOpen" Value="True"/>
+                                </DataTrigger>
+                            </ToolTip.Triggers>
+                        </ToolTip>
+                    </TextBox.ToolTip>-->
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter"
+                                    Command="{Binding SendCommand}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
+            </Grid>
+
+            <Button Grid.Row="1" Grid.Column="1"
+                    Content="Send" Margin="2"
+                    IsEnabled="{Binding ButtonStatus}"
+                    Command="{Binding SendCommand}"/>
+        </Grid>
+    </Grid>
+</Window>
